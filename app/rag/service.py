@@ -1,8 +1,9 @@
+# app/rag/service.py
 import os
 from typing import List
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from app.config import get_settings
 
@@ -11,7 +12,7 @@ settings = get_settings()
 class RagService:
     
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings(api_key=settings.openai_api_key)
+        self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,

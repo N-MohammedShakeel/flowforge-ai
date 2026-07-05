@@ -40,6 +40,7 @@ class ArchitectureAgent(BaseAgent):
         
         try:
             result = await chain.ainvoke({})
+            print(f"ArchitectureAgent Response:\n{result}")
             state.nodes = result.nodes
             state.edges = result.edges
         except Exception as e:

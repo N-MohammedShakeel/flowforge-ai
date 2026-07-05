@@ -16,6 +16,7 @@ class RequirementAgent(BaseAgent):
         
         try:
             requirements = await chain.ainvoke({})
+            print(f"RequirementAgent Response:\n{requirements}")
             state.requirements = requirements
         except Exception as e:
             print(f"Structured output failed: {e}")

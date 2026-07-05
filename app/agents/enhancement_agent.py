@@ -24,6 +24,7 @@ Provide a complete improved architecture.
         
         try:
             result = await chain.ainvoke({})
+            print(f"EnhancementAgent Response:\n{result}")
             state.nodes = result.nodes
             state.edges = result.edges
             print("✅ Enhancement successful with new architecture")

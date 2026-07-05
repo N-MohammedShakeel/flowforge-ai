@@ -6,6 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 class BaseAgent(ABC):
     def __init__(self):
+        
         self.llm = get_llm()
         self.structured_llm = get_structured_llm()
 

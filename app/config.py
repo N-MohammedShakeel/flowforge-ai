@@ -1,12 +1,13 @@
+# app/config.py
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from typing import Optional
 
 class Settings(BaseSettings):
-    # OpenAI
-    openai_api_key: str
-    openai_model: str = "gpt-4o-mini"
-    openai_temperature: float = 0.3
+    # Gemini
+    gemini_api_key: str
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_temperature: float = 0.3
 
     # Environment
     environment: str = "development"
