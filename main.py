@@ -1,4 +1,7 @@
 # flowforge-ai/main.py
+from dotenv import load_dotenv
+load_dotenv()
+
 from app.main import app
 import uvicorn
 from app.config import get_settings
