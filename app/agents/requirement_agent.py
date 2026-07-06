@@ -5,7 +5,14 @@ from app.prompts import REQUIREMENT_SYSTEM_PROMPT
 
 class RequirementAgent(BaseAgent):
     async def execute(self, state: ArchitectureState) -> ArchitectureState:
-        user_prompt = "User Request: " + (state.user_input or "No description provided")
+        # Build context
+        context = ""
+        if state.rag_context:
+            context += f"\n--- SRS Document ---\n{state.rag_context}\n"
+        if state.project_context:
+            context += f"\n--- Project Codebase ---\n{state.project_context}\n"
+            
+        user_prompt = f"User Request: {state.user_input or 'No description provided'}\n{context}"
 
         prompt = self.create_prompt(REQUIREMENT_SYSTEM_PROMPT, user_prompt)
         

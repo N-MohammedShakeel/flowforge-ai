@@ -16,3 +16,6 @@ if __name__ == "__main__":
         reload=True if settings.environment == "development" else False,
         log_level="info"
     )
+
+# uvicorn app.main:app --reload
+# pytest tests\test_main.py -v

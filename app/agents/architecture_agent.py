@@ -13,10 +13,19 @@ class ArchitectureOutput(BaseModel):
 class ArchitectureAgent(BaseAgent):
     async def execute(self, state: ArchitectureState) -> ArchitectureState:
         
+        from app.rag.service import RagService
+        rag_service = RagService()
+
         # Build context safely
         context = ""
-        if state.rag_context:
-            context += f"\n--- SRS Context ---\n{state.rag_context}\n"
+        if state.source == "SRS" and state.project_id:
+            query = f"Architecture requirements, technical stack, modules for {state.requirements.project_name if state.requirements else 'project'}"
+            retrieved_chunks = await rag_service.retrieve_srs_context(query, state.project_id, k=5)
+            if retrieved_chunks:
+                context += f"\n--- SRS Context (Retrieved) ---\n{retrieved_chunks}\n"
+        elif state.rag_context: # fallback
+            context += f"\n--- SRS Context (Full) ---\n{state.rag_context}\n"
+            
         if state.project_context:
             context += f"\n--- Existing Project Context ---\n{state.project_context}\n"
 

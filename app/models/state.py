@@ -1,24 +1,24 @@
 # app/models/state.py
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Literal
 from datetime import datetime
 
 class Node(BaseModel):
-    id: str
-    label: str
-    type: str
-    technology: str
-    description: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    id: str = Field(..., description="Unique identifier for the node.")
+    label: str = Field(..., description="Display label for the node.")
+    type: str = Field(..., description="The category/type of the node (e.g., frontend, database, queue).")
+    technology: str = Field(..., description="Specific technology used (e.g., React, PostgreSQL, RabbitMQ).")
+    description: str = Field(..., description="A brief description of the node's role in the architecture.")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata for the node.")
 
     class Config:
         extra = "allow"
 
 class Edge(BaseModel):
-    source: str
-    target: str
-    type: str
-    label: Optional[str] = None
+    source: str = Field(..., description="ID of the source node.")
+    target: str = Field(..., description="ID of the target node.")
+    type: str = Field(..., description="The type of connection (e.g., api, database, event).")
+    label: Optional[str] = Field(None, description="Optional label describing the connection.")
 
     class Config:
         extra = "allow"
@@ -61,6 +61,51 @@ class ArchitectureOutput(BaseModel):
     class Config:
         extra = "allow"
 
+# ── Security & Compliance ────────────────────────────────────────────────────
+class ComplianceItem(BaseModel):
+    standard: str                          # e.g. "GDPR", "HIPAA", "PCI-DSS"
+    requirement: str                       # what the standard demands
+    status: Literal["compliant", "violation", "needs_review"]
+    recommendation: str
+
+class SecurityReport(BaseModel):
+    risk_level: Literal["low", "medium", "high", "critical"] = "medium"
+    compliance_items: List[ComplianceItem] = Field(default_factory=list)
+    vulnerabilities: List[str] = Field(default_factory=list)
+    security_recommendations: List[str] = Field(default_factory=list)
+    required_nodes: List[Node] = Field(default_factory=list)   # nodes that MUST be added
+    required_edges: List[Edge] = Field(default_factory=list)   # edges that MUST be added
+    web_sources: List[str] = Field(default_factory=list)       # URLs searched
+
+    class Config:
+        extra = "allow"
+
+# ── Infrastructure / DevOps ──────────────────────────────────────────────────
+class InfrastructurePlan(BaseModel):
+    deployment_target: str = "Docker/Kubernetes"
+    infra_nodes: List[Node] = Field(default_factory=list)     # LB, CDN, registry, etc.
+    infra_edges: List[Edge] = Field(default_factory=list)
+    ci_cd_pipeline: List[str] = Field(default_factory=list)   # steps
+    scaling_strategy: str = "Horizontal scaling with HPA"
+    estimated_resources: Dict[str, str] = Field(default_factory=dict)
+
+    class Config:
+        extra = "allow"
+
+# ── Database Design ──────────────────────────────────────────────────────────
+class TableSchema(BaseModel):
+    table_name: str
+    columns: List[Dict[str, str]]   # [{"name": ..., "type": ..., "constraints": ...}]
+    relationships: List[str] = Field(default_factory=list)
+
+class DatabaseSchema(BaseModel):
+    database_technology: str = "PostgreSQL"
+    tables: List[TableSchema] = Field(default_factory=list)
+    design_notes: str = ""
+
+    class Config:
+        extra = "allow"
+
 class ArchitectureState(BaseModel):
     project_id: Optional[str] = None
     source: str = "IDEA"
@@ -68,13 +113,23 @@ class ArchitectureState(BaseModel):
     requirements: Optional[Requirements] = None
     rag_context: Optional[str] = None
     project_context: Optional[str] = None
-    
+
     nodes: List[Node] = Field(default_factory=list)
     edges: List[Edge] = Field(default_factory=list)
-    
+
     review: Optional[ReviewResult] = None
     enhancements: List[Enhancement] = Field(default_factory=list)
-    
+
+    # ── New agent outputs ────────────────────────────────────────────
+    security_report: Optional[SecurityReport] = None
+    infrastructure_plan: Optional[InfrastructurePlan] = None
+    database_schema: Optional[DatabaseSchema] = None
+
+    # ── Supervisor orchestration ─────────────────────────────────────
+    supervisor_decision: Optional[str] = None   # next agent to call
+    iteration: int = 0                          # loop guard
+    max_iterations: int = 5
+
     status: str = "COMPLETED"
     confidence: float = 0.0
     created_at: datetime = Field(default_factory=datetime.utcnow)
